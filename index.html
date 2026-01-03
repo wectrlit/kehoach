@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUẢN LÝ CÔNG VIỆC</title>
+    <title id="pageTitle">QUẢN LÝ CÔNG VIỆC</title>
     <style>
         * {
             margin: 0;
@@ -141,6 +141,126 @@
 
         .active-filter-badge .close:hover {
             color: #d32f2f;
+        }
+
+        /* Modal cho ghi chú */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: #1976D2;
+            color: white;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+            transition: transform 0.2s;
+        }
+
+        .modal-close:hover {
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .note-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #1976D2;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .warning-content {
+            background: #ffebee;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #f44336;
+            line-height: 1.6;
+            color: #c62828;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-weight: 500;
+        }
+
+        .note-empty {
+            color: #999;
+            font-style: italic;
+        }
+
+        .task-clickable {
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .task-clickable:hover {
+            background: #e3f2fd !important;
         }
 
         .filter-group {
@@ -328,6 +448,29 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Modal hiển thị ghi chú -->
+        <div id="noteModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Chi tiết công việc</h3>
+                    <span class="modal-close" onclick="closeNoteModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <h4 id="modalTaskName" style="margin-bottom: 15px; color: #1976D2;"></h4>
+                    
+                    <div id="warningSection" class="info-section" style="display: none;">
+                        <div class="info-label">⚠️ Cảnh báo</div>
+                        <div id="modalTaskWarning" class="warning-content"></div>
+                    </div>
+                    
+                    <div id="noteSection" class="info-section">
+                        <div class="info-label">📝 Ghi chú</div>
+                        <div id="modalTaskNote" class="note-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -482,7 +625,9 @@
 
         // Render header
         function renderHeader() {
-            document.getElementById('projectTitle').textContent = configData.general.TEN_DU_AN || 'HỆ THỐNG QUẢN LÝ CÔNG VIỆC TỰ ĐỘNG';
+            const projectTitle = configData.general.TEN_DU_AN || 'Dashboard Quản Lý';
+            document.getElementById('projectTitle').textContent = projectTitle;
+            document.getElementById('pageTitle').textContent = projectTitle;
             document.getElementById('projectSubtitle').textContent = configData.general.PHU_DE || '';
             document.getElementById('projectUnit').textContent = configData.general.DON_VI_QUAN_LY || '';
         }
@@ -541,6 +686,57 @@
                 });
             });
         }
+
+        // Hiển thị modal ghi chú
+        function showNoteModal(task) {
+            const modal = document.getElementById('noteModal');
+            const taskName = document.getElementById('modalTaskName');
+            const taskNote = document.getElementById('modalTaskNote');
+            const taskWarning = document.getElementById('modalTaskWarning');
+            const warningSection = document.getElementById('warningSection');
+            const noteSection = document.getElementById('noteSection');
+            
+            taskName.textContent = task.name;
+            
+            // Hiển thị cảnh báo nếu có
+            if (task.warning && task.warning.trim()) {
+                taskWarning.innerHTML = task.warning.replace(/\n/g, '<br>');
+                warningSection.style.display = 'block';
+            } else {
+                warningSection.style.display = 'none';
+            }
+            
+            // Hiển thị ghi chú
+            if (task.note && task.note.trim()) {
+                taskNote.innerHTML = task.note.replace(/\n/g, '<br>');
+                taskNote.className = 'note-content';
+            } else {
+                taskNote.textContent = 'Không có ghi chú';
+                taskNote.className = 'note-content note-empty';
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        // Đóng modal
+        function closeNoteModal() {
+            document.getElementById('noteModal').style.display = 'none';
+        }
+
+        // Đóng modal khi click bên ngoài
+        window.onclick = function(event) {
+            const modal = document.getElementById('noteModal');
+            if (event.target === modal) {
+                closeNoteModal();
+            }
+        }
+
+        // Đóng modal khi nhấn ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeNoteModal();
+            }
+        });
 
         // Xử lý khi click vào biểu đồ
         function handleChartClick(department, status) {
@@ -647,6 +843,8 @@
             
             filtered.forEach(task => {
                 const row = document.createElement('tr');
+                row.className = 'task-clickable';
+                row.onclick = () => showNoteModal(task);
                 
                 configData.columns.forEach(col => {
                     const td = document.createElement('td');
