@@ -74,6 +74,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
+        }
+
+        .chart-container:hover {
+            opacity: 0.9;
         }
 
         canvas {
@@ -94,6 +99,48 @@
             gap: 15px;
             flex-wrap: wrap;
             align-items: center;
+        }
+
+        .reset-button {
+            padding: 10px 20px;
+            background: #1976D2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .reset-button:hover {
+            background: #1565C0;
+        }
+
+        .reset-button:active {
+            transform: scale(0.98);
+        }
+
+        .active-filter-badge {
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .active-filter-badge .close {
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .active-filter-badge .close:hover {
+            color: #d32f2f;
         }
 
         .filter-group {
@@ -254,6 +301,8 @@
 
         <div class="filters-section">
             <div class="filters">
+                <div id="activeFilters"></div>
+                <button class="reset-button" id="resetFilters" style="display: none;">Hiển thị tất cả</button>
                 <div class="filter-group">
                     <label>Nhóm việc</label>
                     <select id="groupFilter">
@@ -284,8 +333,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
         // Cấu hình CSV URLs - THAY ĐỔI LINKS NÀY
-        const CSV_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=898225369&single=true&output=csv' ;
-        const CSV_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=0&single=true&output=csv' ;
+        const CSV_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=898225369&single=true&output=csv';
+        const CSV_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=0&single=true&output=csv';
 
         let configData = {
             general: {},
@@ -295,6 +344,7 @@
         };
         let tasksData = [];
         let charts = {};
+        let activeChartFilter = null; // {department: 'KT', status: 'Đang thực hiện'}
 
         // Parse CSV
         function parseCSV(text) {
@@ -479,10 +529,61 @@
                             legend: {
                                 position: 'bottom'
                             }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const statusName = configData.statuses[index].name;
+                                handleChartClick(dept.code, statusName);
+                            }
                         }
                     }
                 });
             });
+        }
+
+        // Xử lý khi click vào biểu đồ
+        function handleChartClick(department, status) {
+            activeChartFilter = { department, status };
+            updateActiveFilterBadge();
+            renderTable();
+            
+            // Scroll xuống bảng
+            document.querySelector('.table-section').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        // Hiển thị badge bộ lọc đang active
+        function updateActiveFilterBadge() {
+            const container = document.getElementById('activeFilters');
+            const resetBtn = document.getElementById('resetFilters');
+            
+            if (activeChartFilter) {
+                const dept = configData.departments.find(d => d.code === activeChartFilter.department);
+                const status = configData.statuses.find(s => s.name === activeChartFilter.status);
+                
+                container.innerHTML = `
+                    <div class="active-filter-badge">
+                        <span>${dept.name} - ${status.name}</span>
+                        <span class="close" onclick="resetAllFilters()">×</span>
+                    </div>
+                `;
+                resetBtn.style.display = 'inline-block';
+            } else {
+                container.innerHTML = '';
+                resetBtn.style.display = 'none';
+            }
+        }
+
+        // Reset tất cả bộ lọc
+        function resetAllFilters() {
+            activeChartFilter = null;
+            document.getElementById('groupFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            updateActiveFilterBadge();
+            renderTable();
         }
 
         // Render filters
@@ -501,18 +602,39 @@
                 statusFilter.innerHTML += `<option value="${s.name}">${s.name}</option>`;
             });
             
-            groupFilter.addEventListener('change', renderTable);
-            statusFilter.addEventListener('change', renderTable);
+            groupFilter.addEventListener('change', () => {
+                activeChartFilter = null;
+                updateActiveFilterBadge();
+                renderTable();
+            });
+            statusFilter.addEventListener('change', () => {
+                activeChartFilter = null;
+                updateActiveFilterBadge();
+                renderTable();
+            });
+            
+            // Nút reset
+            document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
         }
 
         // Render table
         function renderTable() {
-            const groupFilter = document.getElementById('groupFilter').value;
-            const statusFilter = document.getElementById('statusFilter').value;
-            
             let filtered = tasksData;
-            if (groupFilter) filtered = filtered.filter(t => t.group === groupFilter);
-            if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+            
+            // Ưu tiên filter từ chart nếu có
+            if (activeChartFilter) {
+                filtered = filtered.filter(t => 
+                    t.department === activeChartFilter.department && 
+                    t.status === activeChartFilter.status
+                );
+            } else {
+                // Nếu không có filter từ chart, dùng dropdown
+                const groupFilter = document.getElementById('groupFilter').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+                
+                if (groupFilter) filtered = filtered.filter(t => t.group === groupFilter);
+                if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+            }
             
             const thead = document.getElementById('tableHead').querySelector('tr');
             thead.innerHTML = '';
