@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Quản Lý Công Việc</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1976D2;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .unit {
+            color: #999;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #1976D2;
+        }
+
+        .table-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+            color: white;
+        }
+
+        .tag-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #E3F2FD;
+            color: #1976D2;
+            display: inline-block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            select {
+                width: 100%;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="projectTitle">Đang tải...</h1>
+            <div class="subtitle" id="projectSubtitle"></div>
+            <div class="unit" id="projectUnit"></div>
+        </header>
+
+        <div class="charts-section" id="chartsSection">
+            <div class="loading">Đang tải dữ liệu...</div>
+        </div>
+
+        <div class="filters-section">
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Nhóm việc</label>
+                    <select id="groupFilter">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Trạng thái</label>
+                    <select id="statusFilter">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <table>
+                <thead id="tableHead">
+                    <tr></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="10" class="loading">Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script>
+        // Cấu hình CSV URLs - THAY ĐỔI LINKS NÀY
+        const CSV_CONFIG_URL = 'YOUR_GOOGLE_SHEET_CONFIG_CSV_URL';
+        const CSV_DATA_URL = 'YOUR_GOOGLE_SHEET_DATA_CSV_URL';
+
+        let configData = {
+            general: {},
+            departments: [],
+            statuses: [],
+            columns: []
+        };
+        let tasksData = [];
+        let charts = {};
+
+        // Parse CSV
+        function parseCSV(text) {
+            const lines = text.split('\n').filter(line => line.trim());
+            const result = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const values = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                values.push(current.trim());
+                result.push(values);
+            }
+            
+            return result;
+        }
+
+        // Load config từ Google Sheet
+        async function loadConfig() {
+            try {
+                const response = await fetch(CSV_CONFIG_URL);
+                const text = await response.text();
+                const rows = parseCSV(text);
+                
+                // Parse general config
+                let i = 1;
+                while (i < rows.length && rows[i][0] !== 'Ma_phong') {
+                    if (rows[i][0]) {
+                        configData.general[rows[i][0]] = rows[i][1];
+                    }
+                    i++;
+                }
+                
+                // Parse departments
+                i++;
+                while (i < rows.length && rows[i][0] && rows[i][0] !== 'Trang_thai') {
+                    if (rows[i][3] && rows[i][3].toUpperCase() === 'TRUE') {
+                        configData.departments.push({
+                            code: rows[i][0].trim(),
+                            name: rows[i][1].trim(),
+                            order: parseInt(rows[i][2]) || 999
+                        });
+                    }
+                    i++;
+                }
+                
+                // Parse statuses
+                i++;
+                while (i < rows.length && rows[i][0] && rows[i][0] !== 'Ten_cot') {
+                    if (rows[i][3] && rows[i][3].toUpperCase() === 'TRUE') {
+                        configData.statuses.push({
+                            name: rows[i][0].trim(),
+                            color: rows[i][1].trim(),
+                            order: parseInt(rows[i][2]) || 999
+                        });
+                    }
+                    i++;
+                }
+                
+                // Parse columns
+                i++;
+                while (i < rows.length) {
+                    if (rows[i][2] && rows[i][2].toUpperCase() === 'TRUE') {
+                        configData.columns.push({
+                            label: rows[i][0].trim(),
+                            source: rows[i][1].trim(),
+                            order: parseInt(rows[i][3]) || 999,
+                            type: rows[i][4].trim()
+                        });
+                    }
+                    i++;
+                }
+                
+                configData.departments.sort((a, b) => a.order - b.order);
+                configData.statuses.sort((a, b) => a.order - b.order);
+                configData.columns.sort((a, b) => a.order - b.order);
+                
+            } catch (error) {
+                console.error('Lỗi tải cấu hình:', error);
+                throw error;
+            }
+        }
+
+        // Load data từ Google Sheet
+        async function loadData() {
+            try {
+                const response = await fetch(CSV_DATA_URL);
+                const text = await response.text();
+                const rows = parseCSV(text);
+                
+                const headers = rows[0];
+                const colMap = {};
+                headers.forEach((h, idx) => {
+                    colMap[String.fromCharCode(65 + idx)] = idx;
+                });
+                
+                tasksData = [];
+                for (let i = 1; i < rows.length; i++) {
+                    if (!rows[i][colMap.C]) continue;
+                    
+                    tasksData.push({
+                        stt: rows[i][colMap.A],
+                        group: rows[i][colMap.B] ? rows[i][colMap.B].trim() : '',
+                        name: rows[i][colMap.C] ? rows[i][colMap.C].trim() : '',
+                        owner: rows[i][colMap.D] ? rows[i][colMap.D].trim() : '',
+                        startDate: rows[i][colMap.E],
+                        endDate: rows[i][colMap.F],
+                        progress: parseFloat(rows[i][colMap.G]) || 0,
+                        status: rows[i][colMap.H] ? rows[i][colMap.H].trim() : '',
+                        note: rows[i][colMap.I],
+                        warning: rows[i][colMap.J],
+                        department: rows[i][colMap.K] ? rows[i][colMap.K].trim() : ''
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Lỗi tải dữ liệu:', error);
+                throw error;
+            }
+        }
+
+        // Render header
+        function renderHeader() {
+            document.getElementById('projectTitle').textContent = configData.general.TEN_DU_AN || 'Dashboard Quản Lý';
+            document.getElementById('projectSubtitle').textContent = configData.general.PHU_DE || '';
+            document.getElementById('projectUnit').textContent = configData.general.DON_VI_QUAN_LY || '';
+        }
+
+        // Render charts
+        function renderCharts() {
+            const section = document.getElementById('chartsSection');
+            section.innerHTML = '';
+            
+            configData.departments.forEach(dept => {
+                const deptTasks = tasksData.filter(t => t.department === dept.code);
+                const statusCounts = {};
+                
+                configData.statuses.forEach(s => {
+                    statusCounts[s.name] = deptTasks.filter(t => t.status === s.name).length;
+                });
+                
+                const card = document.createElement('div');
+                card.className = 'chart-card';
+                card.innerHTML = `
+                    <h3>${dept.name}</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-${dept.code}"></canvas>
+                    </div>
+                `;
+                section.appendChild(card);
+                
+                const ctx = document.getElementById(`chart-${dept.code}`).getContext('2d');
+                charts[dept.code] = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: configData.statuses.map(s => s.name),
+                        datasets: [{
+                            data: configData.statuses.map(s => statusCounts[s.name]),
+                            backgroundColor: configData.statuses.map(s => s.color),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        // Render filters
+        function renderFilters() {
+            const groupFilter = document.getElementById('groupFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            
+            const groups = [...new Set(tasksData.map(t => t.group))].filter(g => g);
+            groupFilter.innerHTML = '<option value="">Tất cả</option>';
+            groups.forEach(g => {
+                groupFilter.innerHTML += `<option value="${g}">${g}</option>`;
+            });
+            
+            statusFilter.innerHTML = '<option value="">Tất cả</option>';
+            configData.statuses.forEach(s => {
+                statusFilter.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            });
+            
+            groupFilter.addEventListener('change', renderTable);
+            statusFilter.addEventListener('change', renderTable);
+        }
+
+        // Render table
+        function renderTable() {
+            const groupFilter = document.getElementById('groupFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            let filtered = tasksData;
+            if (groupFilter) filtered = filtered.filter(t => t.group === groupFilter);
+            if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+            
+            const thead = document.getElementById('tableHead').querySelector('tr');
+            thead.innerHTML = '';
+            configData.columns.forEach(col => {
+                thead.innerHTML += `<th>${col.label}</th>`;
+            });
+            
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            filtered.forEach(task => {
+                const row = document.createElement('tr');
+                
+                configData.columns.forEach(col => {
+                    const td = document.createElement('td');
+                    const sourceCol = col.source;
+                    let value = '';
+                    
+                    if (sourceCol === 'C') value = task.name;
+                    else if (sourceCol === 'B') value = task.group;
+                    else if (sourceCol === 'D') value = task.owner;
+                    else if (sourceCol === 'E') value = task.startDate;
+                    else if (sourceCol === 'F') value = task.endDate;
+                    else if (sourceCol === 'G') value = task.progress;
+                    else if (sourceCol === 'H') value = task.status;
+                    else if (sourceCol === 'I') value = task.note;
+                    
+                    if (col.type === 'PROGRESS') {
+                        td.innerHTML = `
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${value}%">${value}%</div>
+                            </div>
+                        `;
+                    } else if (col.type === 'STATUS') {
+                        const status = configData.statuses.find(s => s.name === value);
+                        const color = status ? status.color : '#999';
+                        td.innerHTML = `<span class="status-badge" style="background: ${color}">${value}</span>`;
+                    } else if (col.type === 'TAG') {
+                        td.innerHTML = `<span class="tag-badge">${value}</span>`;
+                    } else {
+                        td.textContent = value;
+                    }
+                    
+                    row.appendChild(td);
+                });
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Initialize
+        async function init() {
+            try {
+                await loadConfig();
+                await loadData();
+                renderHeader();
+                renderCharts();
+                renderFilters();
+                renderTable();
+            } catch (error) {
+                document.querySelector('.container').innerHTML = `
+                    <div class="error">
+                        <h2>Lỗi tải dữ liệu</h2>
+                        <p>Vui lòng kiểm tra:</p>
+                        <ul>
+                            <li>URL Google Sheet đã được cấu hình đúng trong mã nguồn</li>
+                            <li>Google Sheet đã được "Publish to Web" dạng CSV</li>
+                            <li>Cấu trúc dữ liệu đúng theo tài liệu</li>
+                        </ul>
+                        <p>Chi tiết lỗi: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
