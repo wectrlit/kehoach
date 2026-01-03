@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">QUẢN LÝ CÔNG VIỆC</title>
+    <title id="pageTitle">QUẢN LÝ DỰ ÁN</title>
     <style>
         * {
             margin: 0;
@@ -522,8 +522,15 @@
         // Load config từ Google Sheet
         async function loadConfig() {
             try {
+                console.log('Đang tải cấu hình từ:', CSV_CONFIG_URL);
                 const response = await fetch(CSV_CONFIG_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const text = await response.text();
+                console.log('Dữ liệu cấu hình đã tải:', text.substring(0, 200));
                 const rows = parseCSV(text);
                 
                 // Parse general config
@@ -588,8 +595,15 @@
         // Load data từ Google Sheet
         async function loadData() {
             try {
+                console.log('Đang tải dữ liệu từ:', CSV_DATA_URL);
                 const response = await fetch(CSV_DATA_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const text = await response.text();
+                console.log('Dữ liệu công việc đã tải, số dòng:', text.split('\n').length);
                 const rows = parseCSV(text);
                 
                 const headers = rows[0];
@@ -886,23 +900,56 @@
         // Initialize
         async function init() {
             try {
+                // Kiểm tra URL đã được cấu hình chưa
+                if (CSV_CONFIG_URL.includes('YOUR_GOOGLE_SHEET') || CSV_DATA_URL.includes('YOUR_GOOGLE_SHEET')) {
+                    throw new Error('Chưa cấu hình URL Google Sheet. Vui lòng cập nhật CSV_CONFIG_URL và CSV_DATA_URL trong mã nguồn.');
+                }
+                
+                console.log('Bắt đầu tải dữ liệu...');
                 await loadConfig();
+                console.log('✅ Cấu hình đã tải');
+                
                 await loadData();
+                console.log('✅ Dữ liệu đã tải');
+                
                 renderHeader();
                 renderCharts();
                 renderFilters();
                 renderTable();
+                console.log('✅ Dashboard đã render thành công');
             } catch (error) {
+                console.error('❌ Lỗi chi tiết:', error);
                 document.querySelector('.container').innerHTML = `
                     <div class="error">
-                        <h2>Lỗi tải dữ liệu</h2>
-                        <p>Vui lòng kiểm tra:</p>
-                        <ul>
-                            <li>URL Google Sheet đã được cấu hình đúng trong mã nguồn</li>
-                            <li>Google Sheet đã được "Publish to Web" dạng CSV</li>
-                            <li>Cấu trúc dữ liệu đúng theo tài liệu</li>
-                        </ul>
-                        <p>Chi tiết lỗi: ${error.message}</p>
+                        <h2>⚠️ Lỗi tải dữ liệu</h2>
+                        <p><strong>Chi tiết lỗi:</strong> ${error.message}</p>
+                        <h3>Vui lòng kiểm tra:</h3>
+                        <ol style="text-align: left; margin: 20px 0;">
+                            <li><strong>URL Google Sheet đã được cấu hình chưa?</strong>
+                                <br>→ Mở file HTML, tìm dòng 282-283
+                                <br>→ Thay thế URL mẫu bằng URL publish của bạn
+                            </li>
+                            <li><strong>Google Sheet đã được "Publish to Web" chưa?</strong>
+                                <br>→ File → Share → Publish to web
+                                <br>→ Chọn sheet cụ thể → Format: CSV → Publish
+                            </li>
+                            <li><strong>URL đúng định dạng chưa?</strong>
+                                <br>→ Phải có dạng: <code>https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=...&output=csv</code>
+                                <br>→ KHÔNG phải: <code>https://docs.google.com/spreadsheets/d/1jmJ.../edit</code>
+                            </li>
+                            <li><strong>Test URL trong trình duyệt:</strong>
+                                <br>→ Dán URL vào thanh địa chỉ
+                                <br>→ Phải hiển thị nội dung CSV (text với dấu phẩy)
+                            </li>
+                        </ol>
+                        <h3>URL hiện tại:</h3>
+                        <p style="word-break: break-all; background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                            <strong>Config:</strong> ${CSV_CONFIG_URL}<br><br>
+                            <strong>Data:</strong> ${CSV_DATA_URL}
+                        </p>
+                        <p style="margin-top: 20px;">
+                            Mở <strong>Console</strong> (F12) để xem thêm thông tin chi tiết.
+                        </p>
                     </div>
                 `;
             }
