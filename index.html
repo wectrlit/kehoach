@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">QUẢN LÝ CÔNG VIỆC</title>
+    <title id="pageTitle">Quản Lý Công Việc</title>
     <style>
         * {
             margin: 0;
@@ -482,8 +482,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
         // Cấu hình CSV URLs - THAY ĐỔI LINKS NÀY
-        const CSV_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=898225369&amp;single=true&amp;output=csv&';
-        const CSV_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=0&amp;single=true&amp;output=csv&';
+        const CSV_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=898225369&single=true&output=csv';
+        const CSV_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=0&single=true&output=csv';
 
         let configData = {
             general: {},
@@ -542,17 +542,36 @@
                 
                 // Parse general config
                 let i = 0;
-                while (i < rows.length && rows[i][0] && !rows[i][0].includes('Ma_phong') && !rows[i][0].includes('MA_PHONG')) {
-                    if (rows[i][0] && rows[i][1]) {
-                        configData.general[rows[i][0].trim()] = rows[i][1].trim();
+                while (i < rows.length) {
+                    const cell = rows[i][0] ? rows[i][0].trim() : '';
+                    // Dừng khi gặp header phòng ban
+                    if (cell.toLowerCase().includes('ma_phong')) break;
+                    
+                    // Chỉ lưu nếu có cả key và value
+                    if (cell && rows[i][1]) {
+                        configData.general[cell] = rows[i][1].trim();
                     }
                     i++;
                 }
                 
                 // Parse departments
-                if (rows[i] && (rows[i][0].includes('Ma_phong') || rows[i][0].includes('MA_PHONG'))) {
+                while (i < rows.length) {
+                    const cell = rows[i][0] ? rows[i][0].trim().toLowerCase() : '';
+                    if (cell.includes('ma_phong')) {
+                        i++; // Bỏ qua dòng header
+                        break;
+                    }
                     i++;
-                    while (i < rows.length && rows[i][0] && !rows[i][0].includes('Trang_thai') && !rows[i][0].includes('TRANG_THAI')) {
+                }
+                
+                // Đọc dữ liệu phòng ban
+                while (i < rows.length) {
+                    const cell = rows[i][0] ? rows[i][0].trim().toLowerCase() : '';
+                    // Dừng khi gặp header trạng thái
+                    if (cell.includes('trang_thai')) break;
+                    
+                    // Chỉ lưu dòng có mã phòng
+                    if (rows[i][0] && rows[i][1]) {
                         const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
                         if (hideVal === 'TRUE') {
                             configData.departments.push({
@@ -561,60 +580,72 @@
                                 order: parseInt(rows[i][2]) || 999
                             });
                         }
-                        i++;
                     }
+                    i++;
                 }
                 
                 // Parse statuses (có thể là global hoặc theo phòng)
                 while (i < rows.length) {
-                    if (rows[i][0] && (rows[i][0].includes('Trang_thai') || rows[i][0].includes('TRANG_THAI'))) {
+                    const cell = rows[i][0] ? rows[i][0].trim().toLowerCase() : '';
+                    if (cell.includes('trang_thai')) {
                         // Kiểm tra xem có cột Ma_phong không (trạng thái riêng)
                         const headers = rows[i];
-                        const hasDeptCol = headers.some(h => h.includes('Ma_phong') || h.includes('MA_PHONG'));
+                        const hasDeptCol = headers.some(h => h && h.toLowerCase().includes('ma_phong'));
                         
                         i++;
                         
                         if (hasDeptCol) {
                             // Trạng thái riêng cho từng phòng
-                            while (i < rows.length && rows[i][0] && !rows[i][0].includes('Ten_cot') && !rows[i][0].includes('TEN_COT')) {
-                                const deptCode = rows[i][4] ? rows[i][4].trim() : '';
-                                const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
+                            while (i < rows.length) {
+                                const nextCell = rows[i][0] ? rows[i][0].trim().toLowerCase() : '';
+                                if (nextCell.includes('ten_cot')) break;
                                 
-                                if (hideVal === 'TRUE' && deptCode) {
-                                    if (!configData.departmentStatuses[deptCode]) {
-                                        configData.departmentStatuses[deptCode] = [];
+                                if (rows[i][0] && rows[i][1]) {
+                                    const deptCode = rows[i][4] ? rows[i][4].trim() : '';
+                                    const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
+                                    
+                                    if (hideVal === 'TRUE' && deptCode) {
+                                        if (!configData.departmentStatuses[deptCode]) {
+                                            configData.departmentStatuses[deptCode] = [];
+                                        }
+                                        configData.departmentStatuses[deptCode].push({
+                                            name: rows[i][0].trim(),
+                                            color: rows[i][1].trim(),
+                                            order: parseInt(rows[i][2]) || 999
+                                        });
                                     }
-                                    configData.departmentStatuses[deptCode].push({
-                                        name: rows[i][0].trim(),
-                                        color: rows[i][1].trim(),
-                                        order: parseInt(rows[i][2]) || 999
-                                    });
                                 }
                                 i++;
                             }
                         } else {
                             // Trạng thái chung cho tất cả
-                            while (i < rows.length && rows[i][0] && !rows[i][0].includes('Ten_cot') && !rows[i][0].includes('TEN_COT')) {
-                                const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
-                                if (hideVal === 'TRUE') {
-                                    configData.globalStatuses.push({
-                                        name: rows[i][0].trim(),
-                                        color: rows[i][1].trim(),
-                                        order: parseInt(rows[i][2]) || 999
-                                    });
+                            while (i < rows.length) {
+                                const nextCell = rows[i][0] ? rows[i][0].trim().toLowerCase() : '';
+                                if (nextCell.includes('ten_cot')) break;
+                                
+                                if (rows[i][0] && rows[i][1]) {
+                                    const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
+                                    if (hideVal === 'TRUE') {
+                                        configData.globalStatuses.push({
+                                            name: rows[i][0].trim(),
+                                            color: rows[i][1].trim(),
+                                            order: parseInt(rows[i][2]) || 999
+                                        });
+                                    }
                                 }
                                 i++;
                             }
                         }
-                    } else {
-                        i++;
+                        break;
                     }
+                    i++;
                 }
                 
                 // Parse columns
                 i = 0;
                 while (i < rows.length) {
-                    if (rows[i][0] && (rows[i][0].includes('Ten_cot') || rows[i][0].includes('TEN_COT'))) {
+                    const cell = rows[i][0] ? rows[i][0].trim().toLowerCase() : '';
+                    if (cell.includes('ten_cot')) {
                         i++;
                         while (i < rows.length && rows[i][0]) {
                             const hideVal = rows[i][2] ? rows[i][2].trim().toUpperCase() : 'TRUE';
@@ -623,7 +654,7 @@
                                     label: rows[i][0].trim(),
                                     source: rows[i][1].trim(),
                                     order: parseInt(rows[i][3]) || 999,
-                                    type: rows[i][4].trim()
+                                    type: rows[i][4] ? rows[i][4].trim() : 'TEXT'
                                 });
                             }
                             i++;
