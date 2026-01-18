@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">GIP-1</title>
+    <title id="pageTitle">QUẢN LÝ CÔNG VIỆC</title>
     <style>
         * {
             margin: 0;
@@ -143,6 +143,118 @@
             color: #d32f2f;
         }
 
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #1976D2;
+        }
+
+        .table-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+            color: white;
+        }
+
+        .tag-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #E3F2FD;
+            color: #1976D2;
+            display: inline-block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
         /* Modal cho ghi chú */
         .modal {
             display: none;
@@ -263,118 +375,6 @@
             background: #e3f2fd !important;
         }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .filter-group label {
-            font-size: 14px;
-            color: #666;
-            font-weight: 500;
-        }
-
-        select {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            background: white;
-            cursor: pointer;
-            min-width: 200px;
-        }
-
-        select:focus {
-            outline: none;
-            border-color: #1976D2;
-        }
-
-        .table-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background: #f8f9fa;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #dee2e6;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        tr:hover {
-            background: #f8f9fa;
-        }
-
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            display: inline-block;
-            color: white;
-        }
-
-        .tag-badge {
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            background: #E3F2FD;
-            color: #1976D2;
-            display: inline-block;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #45a049);
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -435,6 +435,12 @@
                         <option value="">Tất cả</option>
                     </select>
                 </div>
+                <div class="filter-group">
+                    <label>Phòng ban</label>
+                    <select id="departmentFilter">
+                        <option value="">Tất cả</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -476,18 +482,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script>
         // Cấu hình CSV URLs - THAY ĐỔI LINKS NÀY
-        const CSV_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=898225369&single=true&output=csv';
-        const CSV_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=0&single=true&output=csv';
+        const CSV_CONFIG_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=898225369&amp;single=true&amp;output=csv&';
+        const CSV_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSX-Ryt-q_St0HZOxShWqCxJF60rQZsbZ3VF2nKgoE-UU7dTttEnetbzQpYAvzTdv_hbqxehcwg6y3s/pub?gid=0&amp;single=true&amp;output=csv&';
 
         let configData = {
             general: {},
             departments: [],
-            statuses: [],
+            departmentStatuses: {}, // Trạng thái riêng cho từng phòng
+            globalStatuses: [],     // Trạng thái chung
             columns: []
         };
         let tasksData = [];
         let charts = {};
-        let activeChartFilter = null; // {department: 'KT', status: 'Đang thực hiện'}
+        let activeChartFilter = null;
 
         // Parse CSV
         function parseCSV(text) {
@@ -522,62 +529,118 @@
         // Load config từ Google Sheet
         async function loadConfig() {
             try {
+                console.log('Đang tải cấu hình từ:', CSV_CONFIG_URL);
                 const response = await fetch(CSV_CONFIG_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const text = await response.text();
+                console.log('Dữ liệu cấu hình đã tải:', text.substring(0, 200));
                 const rows = parseCSV(text);
                 
                 // Parse general config
-                let i = 1;
-                while (i < rows.length && rows[i][0] !== 'Ma_phong') {
-                    if (rows[i][0]) {
-                        configData.general[rows[i][0]] = rows[i][1];
+                let i = 0;
+                while (i < rows.length && rows[i][0] && !rows[i][0].includes('Ma_phong') && !rows[i][0].includes('MA_PHONG')) {
+                    if (rows[i][0] && rows[i][1]) {
+                        configData.general[rows[i][0].trim()] = rows[i][1].trim();
                     }
                     i++;
                 }
                 
                 // Parse departments
-                i++;
-                while (i < rows.length && rows[i][0] && rows[i][0] !== 'Trang_thai') {
-                    if (rows[i][3] && rows[i][3].toUpperCase() === 'TRUE') {
-                        configData.departments.push({
-                            code: rows[i][0].trim(),
-                            name: rows[i][1].trim(),
-                            order: parseInt(rows[i][2]) || 999
-                        });
-                    }
+                if (rows[i] && (rows[i][0].includes('Ma_phong') || rows[i][0].includes('MA_PHONG'))) {
                     i++;
+                    while (i < rows.length && rows[i][0] && !rows[i][0].includes('Trang_thai') && !rows[i][0].includes('TRANG_THAI')) {
+                        const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
+                        if (hideVal === 'TRUE') {
+                            configData.departments.push({
+                                code: rows[i][0].trim(),
+                                name: rows[i][1].trim(),
+                                order: parseInt(rows[i][2]) || 999
+                            });
+                        }
+                        i++;
+                    }
                 }
                 
-                // Parse statuses
-                i++;
-                while (i < rows.length && rows[i][0] && rows[i][0] !== 'Ten_cot') {
-                    if (rows[i][3] && rows[i][3].toUpperCase() === 'TRUE') {
-                        configData.statuses.push({
-                            name: rows[i][0].trim(),
-                            color: rows[i][1].trim(),
-                            order: parseInt(rows[i][2]) || 999
-                        });
+                // Parse statuses (có thể là global hoặc theo phòng)
+                while (i < rows.length) {
+                    if (rows[i][0] && (rows[i][0].includes('Trang_thai') || rows[i][0].includes('TRANG_THAI'))) {
+                        // Kiểm tra xem có cột Ma_phong không (trạng thái riêng)
+                        const headers = rows[i];
+                        const hasDeptCol = headers.some(h => h.includes('Ma_phong') || h.includes('MA_PHONG'));
+                        
+                        i++;
+                        
+                        if (hasDeptCol) {
+                            // Trạng thái riêng cho từng phòng
+                            while (i < rows.length && rows[i][0] && !rows[i][0].includes('Ten_cot') && !rows[i][0].includes('TEN_COT')) {
+                                const deptCode = rows[i][4] ? rows[i][4].trim() : '';
+                                const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
+                                
+                                if (hideVal === 'TRUE' && deptCode) {
+                                    if (!configData.departmentStatuses[deptCode]) {
+                                        configData.departmentStatuses[deptCode] = [];
+                                    }
+                                    configData.departmentStatuses[deptCode].push({
+                                        name: rows[i][0].trim(),
+                                        color: rows[i][1].trim(),
+                                        order: parseInt(rows[i][2]) || 999
+                                    });
+                                }
+                                i++;
+                            }
+                        } else {
+                            // Trạng thái chung cho tất cả
+                            while (i < rows.length && rows[i][0] && !rows[i][0].includes('Ten_cot') && !rows[i][0].includes('TEN_COT')) {
+                                const hideVal = rows[i][3] ? rows[i][3].trim().toUpperCase() : 'TRUE';
+                                if (hideVal === 'TRUE') {
+                                    configData.globalStatuses.push({
+                                        name: rows[i][0].trim(),
+                                        color: rows[i][1].trim(),
+                                        order: parseInt(rows[i][2]) || 999
+                                    });
+                                }
+                                i++;
+                            }
+                        }
+                    } else {
+                        i++;
                     }
-                    i++;
                 }
                 
                 // Parse columns
-                i++;
+                i = 0;
                 while (i < rows.length) {
-                    if (rows[i][2] && rows[i][2].toUpperCase() === 'TRUE') {
-                        configData.columns.push({
-                            label: rows[i][0].trim(),
-                            source: rows[i][1].trim(),
-                            order: parseInt(rows[i][3]) || 999,
-                            type: rows[i][4].trim()
-                        });
+                    if (rows[i][0] && (rows[i][0].includes('Ten_cot') || rows[i][0].includes('TEN_COT'))) {
+                        i++;
+                        while (i < rows.length && rows[i][0]) {
+                            const hideVal = rows[i][2] ? rows[i][2].trim().toUpperCase() : 'TRUE';
+                            if (hideVal === 'TRUE') {
+                                configData.columns.push({
+                                    label: rows[i][0].trim(),
+                                    source: rows[i][1].trim(),
+                                    order: parseInt(rows[i][3]) || 999,
+                                    type: rows[i][4].trim()
+                                });
+                            }
+                            i++;
+                        }
+                        break;
                     }
                     i++;
                 }
                 
                 configData.departments.sort((a, b) => a.order - b.order);
-                configData.statuses.sort((a, b) => a.order - b.order);
+                configData.globalStatuses.sort((a, b) => a.order - b.order);
+                Object.keys(configData.departmentStatuses).forEach(dept => {
+                    configData.departmentStatuses[dept].sort((a, b) => a.order - b.order);
+                });
                 configData.columns.sort((a, b) => a.order - b.order);
+                
+                console.log('Config parsed:', configData);
                 
             } catch (error) {
                 console.error('Lỗi tải cấu hình:', error);
@@ -585,11 +648,26 @@
             }
         }
 
+        // Lấy danh sách trạng thái cho phòng
+        function getStatusesForDepartment(deptCode) {
+            if (configData.departmentStatuses[deptCode]) {
+                return configData.departmentStatuses[deptCode];
+            }
+            return configData.globalStatuses;
+        }
+
         // Load data từ Google Sheet
         async function loadData() {
             try {
+                console.log('Đang tải dữ liệu từ:', CSV_DATA_URL);
                 const response = await fetch(CSV_DATA_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const text = await response.text();
+                console.log('Dữ liệu công việc đã tải, số dòng:', text.split('\n').length);
                 const rows = parseCSV(text);
                 
                 const headers = rows[0];
@@ -625,11 +703,11 @@
 
         // Render header
         function renderHeader() {
-            const projectTitle = configData.general.TEN_DU_AN || 'KHU CÔNG NGHIỆP LIÊN HÀ THÁI (GREEN IP-1)';
+            const projectTitle = configData.general.TEN_DU_AN || configData.general.TEN_DU_AN || 'Dashboard Quản Lý';
             document.getElementById('projectTitle').textContent = projectTitle;
             document.getElementById('pageTitle').textContent = projectTitle;
-            document.getElementById('projectSubtitle').textContent = configData.general.PHU_DE || '';
-            document.getElementById('projectUnit').textContent = configData.general.DON_VI_QUAN_LY || '';
+            document.getElementById('projectSubtitle').textContent = configData.general.PHU_DE || configData.general.PHU_DE || '';
+            document.getElementById('projectUnit').textContent = configData.general.DON_VI_QUAN_LY || configData.general.DON_VI_QUAN_LY || '';
         }
 
         // Render charts
@@ -639,9 +717,10 @@
             
             configData.departments.forEach(dept => {
                 const deptTasks = tasksData.filter(t => t.department === dept.code);
+                const statuses = getStatusesForDepartment(dept.code);
                 const statusCounts = {};
                 
-                configData.statuses.forEach(s => {
+                statuses.forEach(s => {
                     statusCounts[s.name] = deptTasks.filter(t => t.status === s.name).length;
                 });
                 
@@ -659,10 +738,10 @@
                 charts[dept.code] = new Chart(ctx, {
                     type: 'doughnut',
                     data: {
-                        labels: configData.statuses.map(s => s.name),
+                        labels: statuses.map(s => s.name),
                         datasets: [{
-                            data: configData.statuses.map(s => statusCounts[s.name]),
-                            backgroundColor: configData.statuses.map(s => s.color),
+                            data: statuses.map(s => statusCounts[s.name]),
+                            backgroundColor: statuses.map(s => s.color),
                             borderWidth: 2,
                             borderColor: '#fff'
                         }]
@@ -678,7 +757,7 @@
                         onClick: (event, elements) => {
                             if (elements.length > 0) {
                                 const index = elements[0].index;
-                                const statusName = configData.statuses[index].name;
+                                const statusName = statuses[index].name;
                                 handleChartClick(dept.code, statusName);
                             }
                         }
@@ -687,64 +766,12 @@
             });
         }
 
-        // Hiển thị modal ghi chú
-        function showNoteModal(task) {
-            const modal = document.getElementById('noteModal');
-            const taskName = document.getElementById('modalTaskName');
-            const taskNote = document.getElementById('modalTaskNote');
-            const taskWarning = document.getElementById('modalTaskWarning');
-            const warningSection = document.getElementById('warningSection');
-            const noteSection = document.getElementById('noteSection');
-            
-            taskName.textContent = task.name;
-            
-            // Hiển thị cảnh báo nếu có
-            if (task.warning && task.warning.trim()) {
-                taskWarning.innerHTML = task.warning.replace(/\n/g, '<br>');
-                warningSection.style.display = 'block';
-            } else {
-                warningSection.style.display = 'none';
-            }
-            
-            // Hiển thị ghi chú
-            if (task.note && task.note.trim()) {
-                taskNote.innerHTML = task.note.replace(/\n/g, '<br>');
-                taskNote.className = 'note-content';
-            } else {
-                taskNote.textContent = 'Không có ghi chú';
-                taskNote.className = 'note-content note-empty';
-            }
-            
-            modal.style.display = 'block';
-        }
-
-        // Đóng modal
-        function closeNoteModal() {
-            document.getElementById('noteModal').style.display = 'none';
-        }
-
-        // Đóng modal khi click bên ngoài
-        window.onclick = function(event) {
-            const modal = document.getElementById('noteModal');
-            if (event.target === modal) {
-                closeNoteModal();
-            }
-        }
-
-        // Đóng modal khi nhấn ESC
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeNoteModal();
-            }
-        });
-
         // Xử lý khi click vào biểu đồ
         function handleChartClick(department, status) {
             activeChartFilter = { department, status };
             updateActiveFilterBadge();
             renderTable();
             
-            // Scroll xuống bảng
             document.querySelector('.table-section').scrollIntoView({ 
                 behavior: 'smooth', 
                 block: 'start' 
@@ -758,11 +785,10 @@
             
             if (activeChartFilter) {
                 const dept = configData.departments.find(d => d.code === activeChartFilter.department);
-                const status = configData.statuses.find(s => s.name === activeChartFilter.status);
                 
                 container.innerHTML = `
                     <div class="active-filter-badge">
-                        <span>${dept.name} - ${status.name}</span>
+                        <span>${dept.name} - ${activeChartFilter.status}</span>
                         <span class="close" onclick="resetAllFilters()">×</span>
                     </div>
                 `;
@@ -778,6 +804,7 @@
             activeChartFilter = null;
             document.getElementById('groupFilter').value = '';
             document.getElementById('statusFilter').value = '';
+            document.getElementById('departmentFilter').value = '';
             updateActiveFilterBadge();
             renderTable();
         }
@@ -786,16 +813,34 @@
         function renderFilters() {
             const groupFilter = document.getElementById('groupFilter');
             const statusFilter = document.getElementById('statusFilter');
+            const departmentFilter = document.getElementById('departmentFilter');
             
+            // Nhóm việc
             const groups = [...new Set(tasksData.map(t => t.group))].filter(g => g);
             groupFilter.innerHTML = '<option value="">Tất cả</option>';
             groups.forEach(g => {
                 groupFilter.innerHTML += `<option value="${g}">${g}</option>`;
             });
             
+            // Trạng thái (tổng hợp tất cả)
+            const allStatuses = new Set();
+            if (configData.globalStatuses.length > 0) {
+                configData.globalStatuses.forEach(s => allStatuses.add(s.name));
+            } else {
+                Object.values(configData.departmentStatuses).forEach(statuses => {
+                    statuses.forEach(s => allStatuses.add(s.name));
+                });
+            }
+            
             statusFilter.innerHTML = '<option value="">Tất cả</option>';
-            configData.statuses.forEach(s => {
-                statusFilter.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+            allStatuses.forEach(s => {
+                statusFilter.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+            
+            // Phòng ban
+            departmentFilter.innerHTML = '<option value="">Tất cả</option>';
+            configData.departments.forEach(d => {
+                departmentFilter.innerHTML += `<option value="${d.code}">${d.name}</option>`;
             });
             
             groupFilter.addEventListener('change', () => {
@@ -808,8 +853,12 @@
                 updateActiveFilterBadge();
                 renderTable();
             });
+            departmentFilter.addEventListener('change', () => {
+                activeChartFilter = null;
+                updateActiveFilterBadge();
+                renderTable();
+            });
             
-            // Nút reset
             document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
         }
 
@@ -817,19 +866,19 @@
         function renderTable() {
             let filtered = tasksData;
             
-            // Ưu tiên filter từ chart nếu có
             if (activeChartFilter) {
                 filtered = filtered.filter(t => 
                     t.department === activeChartFilter.department && 
                     t.status === activeChartFilter.status
                 );
             } else {
-                // Nếu không có filter từ chart, dùng dropdown
                 const groupFilter = document.getElementById('groupFilter').value;
                 const statusFilter = document.getElementById('statusFilter').value;
+                const departmentFilter = document.getElementById('departmentFilter').value;
                 
                 if (groupFilter) filtered = filtered.filter(t => t.group === groupFilter);
                 if (statusFilter) filtered = filtered.filter(t => t.status === statusFilter);
+                if (departmentFilter) filtered = filtered.filter(t => t.department === departmentFilter);
             }
             
             const thead = document.getElementById('tableHead').querySelector('tr');
@@ -859,6 +908,7 @@
                     else if (sourceCol === 'G') value = task.progress;
                     else if (sourceCol === 'H') value = task.status;
                     else if (sourceCol === 'I') value = task.note;
+                    else if (sourceCol === 'K') value = task.department;
                     
                     if (col.type === 'PROGRESS') {
                         td.innerHTML = `
@@ -867,11 +917,15 @@
                             </div>
                         `;
                     } else if (col.type === 'STATUS') {
-                        const status = configData.statuses.find(s => s.name === value);
+                        const statuses = getStatusesForDepartment(task.department);
+                        const status = statuses.find(s => s.name === value);
                         const color = status ? status.color : '#999';
                         td.innerHTML = `<span class="status-badge" style="background: ${color}">${value}</span>`;
                     } else if (col.type === 'TAG') {
                         td.innerHTML = `<span class="tag-badge">${value}</span>`;
+                    } else if (col.type === 'DEPARTMENT') {
+                        const dept = configData.departments.find(d => d.code === value);
+                        td.textContent = dept ? dept.name : value;
                     } else {
                         td.textContent = value;
                     }
@@ -883,26 +937,84 @@
             });
         }
 
+        // Hiển thị modal ghi chú
+        function showNoteModal(task) {
+            const modal = document.getElementById('noteModal');
+            const taskName = document.getElementById('modalTaskName');
+            const taskNote = document.getElementById('modalTaskNote');
+            const taskWarning = document.getElementById('modalTaskWarning');
+            const warningSection = document.getElementById('warningSection');
+            
+            taskName.textContent = task.name;
+            
+            if (task.warning && task.warning.trim()) {
+                taskWarning.innerHTML = task.warning.replace(/\n/g, '<br>');
+                warningSection.style.display = 'block';
+            } else {
+                warningSection.style.display = 'none';
+            }
+            
+            if (task.note && task.note.trim()) {
+                taskNote.innerHTML = task.note.replace(/\n/g, '<br>');
+                taskNote.className = 'note-content';
+            } else {
+                taskNote.textContent = 'Không có ghi chú';
+                taskNote.className = 'note-content note-empty';
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        // Đóng modal
+        function closeNoteModal() {
+            document.getElementById('noteModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('noteModal');
+            if (event.target === modal) {
+                closeNoteModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeNoteModal();
+            }
+        });
+
         // Initialize
         async function init() {
             try {
+                if (CSV_CONFIG_URL.includes('YOUR_GOOGLE_SHEET') || CSV_DATA_URL.includes('YOUR_GOOGLE_SHEET')) {
+                    throw new Error('Chưa cấu hình URL Google Sheet. Vui lòng cập nhật CSV_CONFIG_URL và CSV_DATA_URL trong mã nguồn.');
+                }
+                
+                console.log('Bắt đầu tải dữ liệu...');
                 await loadConfig();
+                console.log('✅ Cấu hình đã tải');
+                
                 await loadData();
+                console.log('✅ Dữ liệu đã tải');
+                
                 renderHeader();
                 renderCharts();
                 renderFilters();
                 renderTable();
+                console.log('✅ Dashboard đã render thành công');
             } catch (error) {
+                console.error('❌ Lỗi chi tiết:', error);
                 document.querySelector('.container').innerHTML = `
                     <div class="error">
-                        <h2>Lỗi tải dữ liệu</h2>
-                        <p>Vui lòng kiểm tra:</p>
-                        <ul>
+                        <h2>⚠️ Lỗi tải dữ liệu</h2>
+                        <p><strong>Chi tiết lỗi:</strong> ${error.message}</p>
+                        <h3>Vui lòng kiểm tra:</h3>
+                        <ol style="text-align: left; margin: 20px 0;">
                             <li>URL Google Sheet đã được cấu hình đúng trong mã nguồn</li>
                             <li>Google Sheet đã được "Publish to Web" dạng CSV</li>
                             <li>Cấu trúc dữ liệu đúng theo tài liệu</li>
-                        </ul>
-                        <p>Chi tiết lỗi: ${error.message}</p>
+                        </ol>
+                        <p style="margin-top: 20px;">Mở <strong>Console</strong> (F12) để xem thêm thông tin.</p>
                     </div>
                 `;
             }
