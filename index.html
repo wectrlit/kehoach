@@ -498,31 +498,56 @@
 
         // Parse CSV
         function parseCSV(text) {
-            const lines = text.split('\n').filter(line => line.trim());
+            // Chuẩn hóa line endings: \r\n và \r → \n
+            text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
             const result = [];
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
+            let i = 0;
+
+            while (i < text.length) {
                 const values = [];
                 let current = '';
                 let inQuotes = false;
-                
-                for (let j = 0; j < line.length; j++) {
-                    const char = line[j];
-                    
+
+                // Bỏ qua dòng trắng
+                while (i < text.length && text[i] === '\n') i++;
+                if (i >= text.length) break;
+
+                // Đọc từng ký tự của một hàng
+                while (i < text.length) {
+                    const char = text[i];
+
                     if (char === '"') {
-                        inQuotes = !inQuotes;
+                        if (inQuotes && text[i + 1] === '"') {
+                            // Escaped quote ""
+                            current += '"';
+                            i += 2;
+                        } else {
+                            inQuotes = !inQuotes;
+                            i++;
+                        }
                     } else if (char === ',' && !inQuotes) {
                         values.push(current.trim());
                         current = '';
+                        i++;
+                    } else if (char === '\n' && !inQuotes) {
+                        // Kết thúc hàng
+                        i++;
+                        break;
                     } else {
                         current += char;
+                        i++;
                     }
                 }
+
                 values.push(current.trim());
-                result.push(values);
+
+                // Chỉ thêm hàng có ít nhất 1 ô không rỗng
+                if (values.some(v => v !== '')) {
+                    result.push(values);
+                }
             }
-            
+
             return result;
         }
 
